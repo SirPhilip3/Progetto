@@ -110,7 +110,7 @@ int main(){
     exit_cols = find_exit(*labirint, rows, cols, &exit_rows);
 
     //mosse(exit_cols, exit_rows);
-
+    printf("printf da branch test");
     printf("%d %d", exit_cols, exit_rows);    
     return 0;
 }
