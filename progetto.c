@@ -16,14 +16,21 @@ void print_labirint(char *labirint, int rows, int cols){
     */
 
 //funzione che mi da il labirinto iniziale mi servono le cols e rows
-void labirint(){
- 
+char* labirint(int cols, int rows){
+    
+    
+    int k=0;
+    char *labrint=(char*) malloc (cols*rows*sizeof(char));
+    if(labrint==0) exit(EXIT_FAILURE);
+    for(int i=0; i<rows; i++){
+            scanf(" %[^\n]s", &labrint[i+k]);
+            k+=cols-1;
+    }
 
-
-
+    return labrint;
 }
 
-//trovo fine del labirinto possiamo farla ricorsiva 
+//trovo fine del labirinto possiamo farla ricorsiva anche trovo inizio
 
 /*
     scorro tutto l'array e vedo quando è == '_' 
@@ -58,7 +65,6 @@ void mosse(int exit_cols, int exit_rows){
         {
         case 'N':{
 
-
         }
             break;
         case 'S':{
@@ -92,25 +98,17 @@ int main(){
     int rows, cols;
     scanf(" %d",&rows);
     scanf(" %d",&cols);
-
-    char labirint[10][19]={
-                        {"###################"},
-                        {"     #          $ #"},
-                        {"#    #          $ #"},
-                        {"#    #   !  #   $ #"},
-                        {"#    #      #   $ #"},
-                        {"#    #      #     _"},
-                        {"#    #      #     #"},
-                        {"#           #     #"},
-                        {"#    $$$$   #     #"},
-                        {"###################"}
-                                                };
-    print_labirint(*labirint, 10 ,19);
+    
+    
+    char *lab=labirint(cols,rows);
+    
+    print_labirint(lab, rows, cols);
     int exit_rows, exit_cols;
-    exit_cols = find_exit(*labirint, rows, cols, &exit_rows);
+    exit_cols = find_exit(lab, rows, cols, &exit_rows);
 
     //mosse(exit_cols, exit_rows);
-    printf("printf da branch test");
-    printf("%d %d", exit_cols, exit_rows);    
+    
+    printf("%d %d", exit_cols, exit_rows); 
+    free(lab);   
     return 0;
 }
