@@ -20,10 +20,10 @@ char* labirint(int cols, int rows){
     
     
     int k=0;
-    char *labrint=(char*) malloc (cols*rows*sizeof(char));
-    if(labrint==0) exit(EXIT_FAILURE);
+    char *labrint=(char*) malloc (cols*rows*sizeof(char));//array di dimesioni date in input 
+    if(labrint==0) exit(EXIT_FAILURE);//check per in caso di malloc non funzionante 
     for(int i=0; i<rows; i++){
-            scanf(" %[^\n]s", &labrint[i+k]);
+            scanf(" %[^\n]s", &labrint[i+k]);//[^\n] include whitespaces
             k+=cols-1;
     }
 
@@ -47,14 +47,30 @@ int find_exit(char *labirint, int rows, int cols, int *exit_rows){
             };
         }
     }
-
 }
 
+//find starting point
+int find_start(char *labirint, int rows, int cols, int *start_rows){
+
+    for(int i=0; i<rows; i++){
+        for (int j=0; j<cols;j++){
+            if(labirint[j+i*cols]== 'o' ){
+                *start_rows=i;
+                return j;
+            };
+        }
+    }
+}
+
+
 //devo tirare fuori current_cols e current_rows per utilizzarle per fare il nuovo labirinto
-void mosse(int exit_cols, int exit_rows){
+void mosse(int exit_cols, int exit_rows, int start_cols, int start_rows){
 
     //find uscita e ripeti finchè le coordinate sono uguali a quelle dell'uscita
     int current_cols, current_rows;
+    //starting point
+    current_cols=start_cols; 
+    current_rows=start_rows;
     //movimento
     char mouvment;
     do
@@ -105,10 +121,15 @@ int main(){
     print_labirint(lab, rows, cols);
     int exit_rows, exit_cols;
     exit_cols = find_exit(lab, rows, cols, &exit_rows);
+    int start_rows, start_cols;
+    start_cols= find_start(lab, rows, cols, &start_rows);
 
-    //mosse(exit_cols, exit_rows);
+    //mosse(exit_cols, exit_rows, start_cols, start_rows);
     
-    printf("%d %d", exit_cols, exit_rows); 
+    printf("%d %d ", exit_cols, exit_rows); 
+    printf("%d %d ", start_cols, start_rows); 
+
+
     free(lab);   
     return 0;
 }
