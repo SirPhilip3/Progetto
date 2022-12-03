@@ -2,11 +2,39 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-void print_labirint(char *labirint, int rows, int cols){
+/*
 
-    for(int i=0; i<rows; i++){
-        for (int j=0; j<cols;j++)
-            printf("%c", labirint[j+i*cols]);
+struct per definire le informazioni del labirinto 
+
+*/
+
+struct labirinto_t
+{
+    char *lab;
+    int rows;
+    int cols;
+};
+
+struct exit_coord
+{
+    int exit_cols;
+    int exit_rows;
+};
+
+struct current_coord
+{
+
+    int current_cols;
+    int current_rows;
+
+};
+
+
+void print_labirint(struct labirinto_t mylabirint){
+
+    for(int i=0; i<mylabirint.rows; i++){
+        for (int j=0; j<mylabirint.cols;j++)
+            printf("%c", mylabirint.lab[j+i*mylabirint.cols]);
         printf("\n");
     }
 }
@@ -16,120 +44,112 @@ void print_labirint(char *labirint, int rows, int cols){
     */
 
 //funzione che mi da il labirinto iniziale mi servono le cols e rows
-char* labirint(int cols, int rows){
-    
+char *labirint(struct labirinto_t mylabirint){
     
     int k=0;
-    char *labrint=(char*) malloc (cols*rows*sizeof(char));//array di dimesioni date in input 
-    if(labrint==0) exit(EXIT_FAILURE);//check per in caso di malloc non funzionante 
-    for(int i=0; i<rows; i++){
-            scanf(" %[^\n]s", &labrint[i+k]);//[^\n] include whitespaces
-            k+=cols-1;
+    mylabirint.lab = (char*) malloc (mylabirint.cols*mylabirint.rows*sizeof(char));//array di dimesioni date in input size of char == 1 
+    if(mylabirint.lab==0) exit(EXIT_FAILURE);//check per in caso di malloc non funzionante 
+    for(int i=0; i<mylabirint.rows; i++){
+            scanf(" %[^\n]s", &mylabirint.lab[i+k]);//[^\n] include whitespaces 
+            k+=mylabirint.cols-1;
     }
-
-    return labrint;
+    return mylabirint.lab;
 }
+
 
 //trovo fine del labirinto possiamo farla ricorsiva anche trovo inizio
 
 /*
     scorro tutto l'array e vedo quando è == '_' 
     quando è così tiro fuori exit_cols e exit_rows
-
+    
 */
-int find_exit(char *labirint, int rows, int cols, int *exit_rows){
+//start_or_exit con macros??
+int find_exit_and_start(struct labirinto_t mylabirint, int *rows, bool start_or_exit){
 
-    for(int i=0; i<rows; i++){
-        for (int j=0; j<cols;j++){
-            if(labirint[j+i*cols]== '_' ){
-                *exit_rows=i;
+    for(int i=0; i<mylabirint.rows; i++){
+        for (int j=0; j<mylabirint.cols;j++){
+            if (start_or_exit==1){
+            if(mylabirint.lab[j+i*mylabirint.cols]== '_' ){
+                *rows=i;
                 return j;
             };
+            }else{
+            if(mylabirint.lab[j+i*mylabirint.cols]== 'o' ){
+                *rows=i;
+                return j;
+            };
+            }
         }
     }
 }
 
-//find starting point
-int find_start(char *labirint, int rows, int cols, int *start_rows){
+bool mosse_recursive(struct exit_coord exit, struct current_coord current){
+    printf("cols %d rows %d\n", current.current_cols, current.current_rows);
 
-    for(int i=0; i<rows; i++){
-        for (int j=0; j<cols;j++){
-            if(labirint[j+i*cols]== 'o' ){
-                *start_rows=i;
-                return j;
-            };
-        }
-    }
-}
+    /*
+    caso base esco quando le coordinate correnti sono uguali alle coordinate di uscita(entrambe quindi &&)
+    chiedo la mossa 
+    modifico le coordinate e richiedo la funzione 
+    */
 
+    if(current.current_cols==exit.exit_cols && current.current_rows==exit.exit_rows) return 0;//fine
+    char mouve;//uso WASD
+    scanf(" %c", &mouve);
+    switch (mouve){
 
-//devo tirare fuori current_cols e current_rows per utilizzarle per fare il nuovo labirinto
-void mosse(int exit_cols, int exit_rows, int start_cols, int start_rows){
-
-    //find uscita e ripeti finchè le coordinate sono uguali a quelle dell'uscita
-    int current_cols, current_rows;
-    //starting point
-    current_cols=start_cols; 
-    current_rows=start_rows;
-    //movimento
-    char mouvment;
-    do
-    {
-        scanf("%c ", &mouvment);
-
-        switch (mouvment)
-        {
-        case 'N':{
-
+        case ('W'):{
+            current.current_rows++;
+            mosse_recursive(exit, current);
         }
             break;
-        case 'S':{
-
+        case ('S'):{
+            current.current_rows--;
+            mosse_recursive(exit, current);
         }
             break;
-        case 'E':{
-
+        case('A'):{
+            current.current_cols--;
+            mosse_recursive(exit, current);
         }
             break;
-        case 'O':{
-
+        case('D'):{
+            current.current_cols++;
+            mosse_recursive(exit, current);
         }
             break;
-        
+
         default:
             break;
-        }
-
-
-
-    } while (exit_cols==current_cols && exit_rows==current_rows);
+    }
     
-
 }
 
 
 
-int main(){
-
-    int rows, cols;
-    scanf(" %d",&rows);
-    scanf(" %d",&cols);
+int main(int argc, char *argv){//per selezionare challenge
+    bool start_or_exit;
+    struct labirinto_t mylabirint;
+    
+    scanf(" %d",&mylabirint.cols);
+    scanf(" %d",&mylabirint.rows);
     
     
-    char *lab=labirint(cols,rows);
-    
-    print_labirint(lab, rows, cols);
-    int exit_rows, exit_cols;
-    exit_cols = find_exit(lab, rows, cols, &exit_rows);
-    int start_rows, start_cols;
-    start_cols= find_start(lab, rows, cols, &start_rows);
+    mylabirint.lab=labirint(mylabirint);
+    print_labirint(mylabirint);
 
-    //mosse(exit_cols, exit_rows, start_cols, start_rows);
-    
-    printf("%d %d ", exit_cols, exit_rows); 
-    printf("%d %d ", start_cols, start_rows); 
+    struct exit_coord exit_coord;
+    struct current_coord current_coord;
+    start_or_exit=1;//1 faccio exit
+    exit_coord.exit_cols = find_exit_and_start(mylabirint, &exit_coord.exit_rows,start_or_exit);
+    printf("exit %d %d ", exit_coord.exit_cols, exit_coord.exit_rows); 
 
+    start_or_exit=0;//0 faccio start
+    current_coord.current_cols = find_exit_and_start(mylabirint, &current_coord.current_rows,start_or_exit);
+    printf("start %d %d ", current_coord.current_cols, current_coord.current_rows);
 
-    free(lab);   
+    mosse_recursive(exit_coord, current_coord);
+
+    free(mylabirint.lab);   
     return 0;
 }
